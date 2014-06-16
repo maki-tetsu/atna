@@ -21,7 +21,7 @@ module ATNA
   #                                                "EventTypeCode" => [{ :code => "2" }, { :code => "3" }])
   #   msg << AuditMessage::ActiveParticipant.new(:UserID => "user2",
   #                                              "RoleIDCode" => [{ :code => "1" }, { :code => "2" }])
-  #   # ...
+  #   msg << AuditMessage::ParticipantObjectIdentification.new("ParticipantObjectName" => { :__text__ => "Name" })
   module RFC3881
     class AuditMessage < ATNA::Utils::XmlBuilder::Base
       class EventIdentification < ATNA::Utils::XmlBuilder::Base
