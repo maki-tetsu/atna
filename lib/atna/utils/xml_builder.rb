@@ -3,11 +3,17 @@ module ATNA
   module Utils
     module XmlBuilder
       class Base
+        TEXT_KEY = :__text__
+
         def self.attributes(*names)
           self.instance_eval do
             @attribute_names ||= []
             names.each do |name|
               @attribute_names << name.to_s.to_sym
+            end
+
+            if @attribute_names.include?(ATNA::Utils::XmlBuilder::Base::TEXT_KEY)
+              raise "Duplicated attribute name for TEXT [#{ATNA::Utils::XmlBuilder::Base::TEXT_KEY.inspect}]"
             end
 
             next @attribute_names.dup
@@ -27,7 +33,7 @@ module ATNA
         end
 
         def self.valid_attribute?(name)
-          attributes.include?(name.to_s.to_sym)
+          attributes.include?(name.to_s.to_sym) || TEXT_KEY == name
         end
 
         def self.node_class(string = false)
@@ -72,6 +78,8 @@ module ATNA
                 end
               when Hash
                 add_child(element_class.new(value))
+              else
+                raise "Unknown value type [#{value.class}]"
               end
             else
               raise "Unknown key [#{key.inspect}]"
@@ -86,51 +94,54 @@ module ATNA
           return self
         end
 
-        alias_method :add_child, :<<
+        alias_method :add_child, :'<<'
 
-          # Convert XML
-          #
-          # xml ::
-          def to_xml(xml = nil)
-            if xml
+        # Convert XML
+        #
+        # xml ::
+        def to_xml(xml = nil)
+          if xml
+            build_xml(xml)
+            return
+          else
+            builder = Nokogiri::XML::Builder.new(:encoding => "UTF-8") do |xml|
               build_xml(xml)
-              return
-            else
-              builder = Nokogiri::XML::Builder.new(:encoding => "UTF-8") do |xml|
-                build_xml(xml)
-              end
-
-              return builder.doc.to_xml
             end
-          end
 
-          def element_name
-            self.class.name.split("::").last.to_sym
+            return builder.doc.to_xml
           end
-
-          def sorted_children
-            children_order = self.class.children_order
-            @children.sort do |a,b|
-              children_order.index(a.class) <=> children_order.index(b.class)
-            end
-          end
-
-          # Build xml by Nokogiri
-          def build_xml(xml)
-            xml.send(element_name, attributes) do
-              sorted_children.each do |element|
-                element.to_xml(xml)
-              end
-            end
-          end
-          private :build_xml
-
-          # Delete nil attributes on copy
-          def attributes
-            @attributes.dup.delete_if { |k,v| v.nil? }
-          end
-          private :attributes
         end
+
+        def element_name
+          self.class.name.split("::").last.to_sym
+        end
+
+        def sorted_children
+          children_order = self.class.children_order
+          @children.sort do |a,b|
+            children_order.index(a.class) <=> children_order.index(b.class)
+          end
+        end
+
+        # Build xml by Nokogiri
+        def build_xml(xml)
+          attrs = attributes
+          text = attrs.delete(ATNA::Utils::XmlBuilder::Base::TEXT_KEY)
+
+          xml.send(element_name, text, attrs) do
+            sorted_children.each do |element|
+              element.to_xml(xml)
+            end
+          end
+        end
+        private :build_xml
+
+        # Delete nil attributes on copy
+        def attributes
+          @attributes.dup.delete_if { |k,v| v.nil? }
+        end
+        private :attributes
       end
     end
   end
+end
