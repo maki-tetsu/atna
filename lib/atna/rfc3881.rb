@@ -12,7 +12,7 @@ module ATNA
   #   include ATNA::RFC3881
   #
   #   msg = AuditMessage.new
-  #   msg << AuditMessage::EventParticipant.new(:UserID => "user1",
+  #   msg << AuditMessage::ActiveParticipant.new(:UserID => "user1",
   #                                             "RoleIDCode" => [{ :code => "1" }, { :code => "2" }])
   #   msg << AuditMessage::EventIdentification.new(:EventActionCode => AuditMessage::EventIdentification::EVENT_ACTION_CODE["Create"],
   #                                                :EventDateTime => Time.now.utc.iso8601,
