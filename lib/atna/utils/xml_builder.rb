@@ -50,13 +50,16 @@ module ATNA
 
         def self.find_element_class(node_name)
           unless idx = node_class(true).index(node_name)
-            raise "Unknown Element [#{node_name}]"
+            puts node_class(true)
+            raise "Unknown Element [#{node_name}] at [#{self.name}]"
           end
 
           return node_class[idx]
         end
 
         def initialize(values = { })
+          values.merge!(yield) if block_given?
+
           @children = []
           @attributes = self.class.attributes.inject({ }) { |h,n| h[n] = nil; next h }
 
