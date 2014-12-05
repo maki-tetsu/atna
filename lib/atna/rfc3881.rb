@@ -60,7 +60,7 @@ module ATNA
           "Telephone Number"                  => 3,
         }
 
-        attributes :UserID, :AlternativeUserID, :UserName, :UserIsRequestor
+        attributes :UserID, :AlternateUserID, :UserName, :UserIsRequestor
         attributes :NetworkAccessPointID, :NetworkAccessPointTypeCode
 
         class RoleIDCode < ATNA::Utils::XmlBuilder::Base
